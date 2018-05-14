@@ -1,0 +1,84 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 15190399960831057216 (0xd2cf24483d715d40)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=AU, ST=Victoria, O=UniMelb, OU=CIS, CN=Assignment2CA
+        Validity
+            Not Before: Jan  1 00:01:01 2017 GMT
+            Not After : Dec 31 23:59:59 2019 GMT
+        Subject: C=AU, ST=Victoria, L=Melbourne, O=UniMelb, OU=COMP30023_CIS, CN=www.comp30023.com
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:ad:ba:dd:c3:24:83:49:71:24:e2:a9:a2:70:de:
+                    fa:33:95:98:63:05:09:5e:e0:ca:26:89:7a:a9:5c:
+                    b3:11:72:4d:09:e2:f3:59:c2:41:f7:2d:66:d7:8a:
+                    53:2a:65:9f:be:27:03:cd:c2:d9:48:33:82:10:7f:
+                    3c:da:ad:54:3e:e2:fb:fd:c9:49:73:a4:7a:52:c8:
+                    e5:23:9e:12:03:2e:91:43:a7:ae:15:e4:32:ee:f9:
+                    8f:b8:69:19:81:d3:a0:71:2f:27:37:61:28:7f:98:
+                    cd:a0:b1:f0:87:c4:24:92:fb:06:8b:d0:26:7d:d7:
+                    6c:3a:35:8b:e0:10:0e:89:ce:c6:a0:fc:3e:c0:08:
+                    b8:d0:ca:d0:30:22:69:70:8c:db:97:00:61:bc:37:
+                    bf:22:40:6d:f8:27:ae:54:d1:e4:df:ba:ab:62:a0:
+                    dc:e7:53:e2:42:69:0e:f9:e8:7b:68:96:21:2c:e7:
+                    68:68:8a:9c:39:00:68:10:a6:b3:e5:1b:b8:35:26:
+                    bb:8c:8b:24:ad:f0:ef:0e:3b:0c:df:f8:19:c3:27:
+                    a1:9b:82:4d:48:78:e0:c4:d2:66:5b:3f:76:d6:15:
+                    7d:76:ae:f8:05:a9:4d:10:8d:ab:d9:0b:1e:0f:28:
+                    3e:db:b5:d6:71:62:7c:cf:09:e9:e5:85:f8:2b:c1:
+                    e2:c9
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Subject Key Identifier: 
+                74:AA:70:4E:FC:84:6C:39:7F:5A:6F:42:93:F7:5C:D8:A9:1A:14:44
+            X509v3 Authority Key Identifier: 
+                keyid:0C:57:96:C1:FC:A4:A7:55:A5:A2:A3:A6:CC:BF:B2:0A:14:8C:3D:84
+
+            X509v3 Key Usage: 
+                Key Encipherment, Key Agreement
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Subject Alternative Name: 
+                DNS:webmail.comp30023.com
+    Signature Algorithm: sha1WithRSAEncryption
+         4d:50:5f:ce:24:4b:fc:27:80:f6:ea:87:13:92:35:c8:7b:28:
+         00:76:02:39:7c:9c:2d:dd:80:21:8e:b4:7c:25:aa:be:58:9e:
+         3b:ba:0c:55:c2:22:66:dc:4c:41:ea:56:fa:db:6c:29:19:62:
+         e1:dd:a5:96:67:18:89:27:19:22:43:fc:0f:b6:8b:89:4b:63:
+         c7:de:71:61:a3:75:80:51:27:ad:65:b4:df:ba:fc:85:15:90:
+         4b:b4:16:04:63:1c:dc:09:72:78:95:89:7e:cf:b4:5e:68:6e:
+         9c:ff:85:86:b2:96:9a:00:4d:85:48:bd:12:43:03:fe:13:f3:
+         c5:07:3f:e5:2e:40:69:1b:e8:55:44:16:28:7c:55:be:88:f5:
+         4e:2f:ec:b8:91:f5:b0:37:09:77:9a:72:c0:03:46:a2:7e:6e:
+         ea:36:58:40:67:f2:5a:a2:8d:04:4c:56:7b:89:5a:44:71:94:
+         37:6e:c1:f2:77:d6:87:1e:a2:ec:9e:2d:08:be:ea:43:26:f4:
+         bb:3a:80:2f:24:30:a7:94:7d:2f:42:9e:5d:cf:93:84:07:4d:
+         24:cf:3c:de:44:81:26:4b:5e:9a:50:ef:1a:b4:ab:09:31:e4:
+         95:f2:6a:19:6a:c2:ce:6c:39:b6:ad:2e:9a:3c:60:f2:b5:74:
+         42:fa:1b:36:d1:e9:d8:85:28:65:0e:40:9c:77:1e:2a:c9:b2:
+         7a:2a:a3:ef:ec:24:e6:0a:d0:a3:0f:d7:3d:8c:dc:51:ab:de:
+         9c:32:89:be:7a:23:d4:86:e5:2a:50:5a:24:b1:5c:de:b0:54:
+         93:8d:1d:89:9e:81:e2:9b:86:c8:f5:0a:78:e8:c1:9f:04:a3:
+         a8:5e:f9:14:de:22:34:4e:25:89:51:60:05:36:e1:94:5a:85:
+         81:d0:ea:e0:ad:68:1e:78:13:68:fa:27:4b:0d:2e:37:61:08:
+         de:c9:16:37:dc:67:7d:35:2e:1a:ed:98:04:7e:c2:9f:84:11:
+         83:a0:37:1e:01:79:06:9d:64:0d:66:e9:fa:a6:6d:37:ea:14:
+         10:7c:b8:95:35:fb:d3:6b:75:ae:57:48:91:a1:80:cf:17:5d:
+         bd:4d:ad:ce:3e:29:9e:6e:06:bd:a7:63:f7:3e:b0:f9:de:dc:
+         26:94:69:14:4e:85:7f:f7:f7:45:d3:ca:66:8a:97:3b:e9:91:
+         08:15:b9:c5:bf:ed:bd:e9:4e:57:0e:67:9e:30:8e:17:de:0f:
+         90:4f:13:38:6d:20:86:8c:c0:19:92:bb:0e:01:d5:6c:98:04:
+         e7:f2:86:be:57:4f:98:c3:47:24:f4:bd:42:77:86:e9:8b:f7:
+         a2:f5:ec:0d:af:64:4c:fb:02:89:6c:48:ab:35:8c:8d:03:82:
+         ab:a1:9c:c8:c2:a1:e5:33:d7:ec:38:26:32:a6:65:ae:fc:fe:
+         76:e4:16:c2:97:68:92:31:2a:b5:30:62:40:23:cc:2b:bc:67:
+         89:01:ac:70:20:e9:2b:cf:5d:77:6c:da:eb:22:c3:7f:2d:0b:
+         4b:2e:02:88:75:d8:58:9c:cb:54:5c:7f:38:6b:32:f2:50:2d:
+         80:cd:b8:9c:d4:89:a2:34:69:96:ce:8a:13:58:1d:44:b2:1d:
+         6b:dd:e9:46:9c:4b:fa:be:15:17:79:36:e9:db:f3:72:d0:b0:
+         af:5b:a0:3e:6c:ee:23:e2:69:2b
