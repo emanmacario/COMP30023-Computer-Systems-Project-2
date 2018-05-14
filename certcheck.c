@@ -10,6 +10,7 @@
 #include <time.h>
 
 
+
 #define MAX_LENGTH 1024
 #define DATE_LEN 128
 
@@ -101,7 +102,7 @@ int main(int argc, char *argv[]) {
     fclose(fp);
 
 
-    const char test_cert_example[] = "./sample_certs/testone.crt";
+    const char test_cert_example[] = "./sample_certs/testsix.crt";
     
     BIO *certificate_bio = NULL;
     X509 *cert = NULL;
@@ -168,6 +169,14 @@ int main(int argc, char *argv[]) {
     printf("psec = %d\n", psec);
 
 
+
+    // Getting size of public key
+    EVP_PKEY *public_key = X509_get_pubkey(cert);
+    RSA *rsa_key = EVP_PKEY_get1_RSA(public_key);
+    int key_len = RSA_size(rsa_key);
+    printf("\nKey size = %d bits\n", key_len * 8); // Need to convert from bytes to bits.
+    RSA_free(rsa_key);
+    EVP_PKEY_free(public_key);
 
 
     exit(EXIT_SUCCESS);
