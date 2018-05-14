@@ -2,13 +2,13 @@
 # Made by Emmanuel Macario <macarioe@student.unimelb.edu.au>
 
 CC     = gcc
-CFLAGS = -Wall -g -lssl -lcrypto
+CFLAGS = -lssl -lcrypto
 OBJ    = certcheck.o
 EXE    = certcheck
 
 # Rule for compilation of the main program
 $(EXE): $(OBJ)
-	$(CC) $(CFLAGS) -o $(EXE) $(OBJ)
+	$(CC) -o $(EXE) $(OBJ) $(CFLAGS)
 
 
 # Remove executables and object files
