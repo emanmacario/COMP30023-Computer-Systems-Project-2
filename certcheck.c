@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-
+#include <stdbool.h>
 #include <time.h>
 
 
@@ -92,13 +92,40 @@ int convert_ASN1_TIME(ASN1_TIME *t, char *buf, size_t len) {
 int main(int argc, char *argv[]) {
 
     // Check command line arguments supplied.
-    if (argc == 43543) {
+    if (argc != 2) {
         usage_exit(argv[0]);
     }
 
-    char *csv_file = argv[0];
+    // Process input csv file.
+    char *csv_file = argv[1];
 
     FILE *fp = fopen(csv_file, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "Failed to open csv file\n");
+        exit(EXIT_FAILURE);
+    }
+
+
+    char filename[MAX_LENGTH], domain[MAX_LENGTH];
+    char buffer[MAX_LENGTH];
+
+    while (fgets(buffer, MAX_LENGTH, fp) != NULL) {
+
+        if (sscanf(buffer, "%[^,],%s\n", filename, domain) != 2) {
+            fprintf(stderr, "Error reading in csv file\n");
+            exit(EXIT_FAILURE);
+        }
+
+        printf("Filename: %s\n", filename);
+        printf("Domain  : %s\n", domain);
+    }
+
+
+    /*
+    while ((n=fscanf(fp, "%s,%s\n", filename, domain) == 2)) {
+        printf("Filename: %s\tDomain: %s\n", filename, domain);
+    }*/
+
     fclose(fp);
 
 
