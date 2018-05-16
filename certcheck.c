@@ -8,11 +8,18 @@
 
 #include <stdbool.h>
 #include <time.h>
+#include <assert.h>
+#include <inttypes.h>
 
+
+#include <openssl/bn.h>
+#include <openssl/asn1.h>
+#include <openssl/x509_vfy.h>
 
 
 #define MAX_LENGTH 1024
 #define DATE_LEN 128
+#define EXTNAME_LEN 1024
 
 /* Functions cannot use:
 X509_check_ca
@@ -120,13 +127,9 @@ int main(int argc, char *argv[]) {
         printf("Domain  : %s\n", domain);
     }
 
-
-    /*
-    while ((n=fscanf(fp, "%s,%s\n", filename, domain) == 2)) {
-        printf("Filename: %s\tDomain: %s\n", filename, domain);
-    }*/
-
     fclose(fp);
+
+
 
 
     const char test_cert_example[] = "./sample_certs/testsix.crt";
@@ -197,13 +200,72 @@ int main(int argc, char *argv[]) {
 
 
 
-    // Getting size of public key
-    EVP_PKEY *public_key = X509_get_pubkey(cert);
-    RSA *rsa_key = EVP_PKEY_get1_RSA(public_key);
-    int key_len = RSA_size(rsa_key);
-    printf("\nKey size = %d bits\n", key_len * 8); // Need to convert from bytes to bits.
-    RSA_free(rsa_key);
-    EVP_PKEY_free(public_key);
+    // Get size of public key in bits.
+    EVP_PKEY *pkey = X509_get_pubkey(cert);
+    int key_type = EVP_PKEY_type(pkey->type);
+    assert(key_type == EVP_PKEY_RSA);
+    int keysize = BN_num_bits(pkey->pkey.rsa->n);
+    EVP_PKEY_free(pkey);
+    printf("Key size = %d bits\n", keysize);
+
+
+    
+    
+    // Fucking around with extensions
+    STACK_OF(X509_EXTENSION) *exts = cert->cert_info->extensions;
+
+    int n_exts;
+    if (exts) {
+        n_exts = sk_X509_EXTENSION_num(exts);
+    } else {
+        n_exts = 0;
+    }
+
+
+    for (int i = 0; i < n_exts; i++) {
+        X509_EXTENSION *ex = sk_X509_EXTENSION_value(exts, i);
+        //IFNULL_FAIL(ex, "Error, unable to extract extension from stack");
+        ASN1_OBJECT *obj = X509_EXTENSION_get_object(ex);
+        //IFNULL_FAIL(obj, "Error, unable to extract ASN1 object from extension");
+
+        BIO *ext_bio = BIO_new(BIO_s_mem());
+        //IFNULL_FAIL(ext_bio, "Unable to allocate memory for extension value BIO");
+        if (!X509V3_EXT_print(ext_bio, ex, 0, 0)) {
+            M_ASN1_OCTET_STRING_print(ext_bio, ex->value);
+        }
+
+        BUF_MEM *bptr;
+        BIO_get_mem_ptr(ext_bio, &bptr);
+        BIO_set_close(ext_bio, BIO_NOCLOSE);
+
+        // remove newlines
+        int lastchar = bptr->length;
+        if (lastchar > 1 && (bptr->data[lastchar-1] == '\n' || bptr->data[lastchar-1] == '\r')) {
+            bptr->data[lastchar-1] = (char) 0;
+        }
+        if (lastchar > 0 && (bptr->data[lastchar] == '\n' || bptr->data[lastchar] == '\r')) {
+            bptr->data[lastchar] = (char) 0;
+        }
+
+        BIO_free(ext_bio);
+
+        unsigned nid = OBJ_obj2nid(obj);
+        if (nid == NID_undef) {
+            // no lookup found for the provided OID so nid came back as undefined.
+            char extname[EXTNAME_LEN];
+            OBJ_obj2txt(extname, EXTNAME_LEN, (const ASN1_OBJECT *) obj, 1);
+            printf("extension name is %s\n", extname);
+        } else {
+            // the OID translated to a NID which implies that the OID has a known sn/ln
+            const char *c_ext_name = OBJ_nid2ln(nid);
+            //IFNULL_FAIL(c_ext_name, "invalid X509v3 extension name");
+            printf("extension name is %s\n", c_ext_name);
+        }
+
+        printf("extension length is %lu\n", bptr->length);
+        printf("extension value is %s\n", bptr->data);
+
+    }
 
 
     exit(EXIT_SUCCESS);
