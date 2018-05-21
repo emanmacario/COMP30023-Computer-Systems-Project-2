@@ -110,13 +110,13 @@ bool validate_rsa_key_size(X509 *cert) {
     EVP_PKEY_free(pkey);
 
     // Print keysize for debugging.
-    printf("Key size = %d bits\n", keysize);
+    //printf("Key size = %d bits\n", keysize);
 
     if (keysize == RSA_KEYSIZE_DEFAULT) {
-        printf("RSA Key size PASSED\n\n");
+        //printf("RSA Key size PASSED\n\n");
         return true;
     }
-    printf("RSA Key size FAILED\n\n");
+    //printf("RSA Key size FAILED\n\n");
     return false;
 }
 
@@ -131,10 +131,10 @@ bool validate_not_before(X509 *cert) {
     // one or both of sec and day will be positive.
 
     if (sec > 0 || day > 0) {
-        printf("Not Before PASSED\n");
+        //printf("Not Before PASSED\n");
         return true;
     }
-    printf("Not Before FAILED\n");
+    //printf("Not Before FAILED\n");
     return false;
 }
 
@@ -149,10 +149,10 @@ bool validate_not_after(X509 *cert) {
     // one or both of sec and day will be positive.
 
     if (sec > 0 || day > 0) {
-        printf("Not After PASSED\n");
+        //printf("Not After PASSED\n");
         return true;
     }
-    printf("Not After FAILED\n");
+    //printf("Not After FAILED\n");
     return false;
 }
 
@@ -188,69 +188,7 @@ bool raw_equals(const char *s1, const char *s2) {
 
 
 
-bool validate_domain_name(char *domain_name, X509 *cert) {
-    assert(domain_name && cert);
-
-    return false;
-}
-
-
-
-
-
-bool matches_common_name(const char *domain_name, X509 *cert) {
-
-    // Get common name. Assume the certificate always has one.
-    X509_NAME *subj = X509_get_subject_name(cert);
-
-    // Find position of CN field in the Subject field of certificate.
-    int cn_loc = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
-    if (cn_loc < 0) {
-        fprintf(stderr, "Unable to find location of CN in Subject field");
-        exit(EXIT_FAILURE);
-    }
-
-    // Extract the CN field.
-    X509_NAME_ENTRY *cn_entry = X509_NAME_get_entry(subj, cn_loc);
-    if (cn_entry == NULL) {
-        fprintf(stderr, "Unable to extract CN entry from Subject field");
-        exit(EXIT_FAILURE);
-    }
-
-    // Convert CN field to a C string.
-    ASN1_STRING *cn_asn1 = X509_NAME_ENTRY_get_data(cn_entry);
-    if (cn_asn1 == NULL) {
-        fprintf(stderr, "Unable to convert CN entry into ASN1 string");
-        exit(EXIT_FAILURE);
-    }
-
-    char *cn = (char *)ASN1_STRING_data(cn_asn1);
-    if (cn == NULL) {
-        fprintf(stderr, "Unable to convert ASN1 string to C string");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("CN: %s\n", cn);
-
-    return false;
-
-
-    /*
-    const char *pattern_match;
-    pattern_match = strchr(domain_name, '*');
-
-    int has_wildcard = pattern_match == NULL ? 0 : 1;
-
-    if (!has_wildcard) {
-        return strcasecmp(domain_name, common_name);
-    }
-
-    return false;
-    */
-}
-
-
-bool hostmatch(const char *domain_name, const char *pattern) {
+bool hostmatch(char *domain_name, char *pattern) {
     char *pattern_wildcard;
 
     // If no wildcard, just if they are the same.
@@ -292,15 +230,91 @@ bool hostmatch(const char *domain_name, const char *pattern) {
 
 
 
+bool matches_common_name(char *domain_name, X509 *cert) {
+
+    // Get common name. Assume the certificate always has one.
+    X509_NAME *subj = X509_get_subject_name(cert);
+
+    // Find position of CN field in the Subject field of certificate.
+    int cn_loc = X509_NAME_get_index_by_NID(subj, NID_commonName, -1);
+    if (cn_loc < 0) {
+        fprintf(stderr, "Unable to find location of CN in Subject field");
+        exit(EXIT_FAILURE);
+    }
+
+    // Extract the CN field.
+    X509_NAME_ENTRY *cn_entry = X509_NAME_get_entry(subj, cn_loc);
+    if (cn_entry == NULL) {
+        fprintf(stderr, "Unable to extract CN entry from Subject field");
+        exit(EXIT_FAILURE);
+    }
+
+    // Convert CN field to a C string.
+    ASN1_STRING *cn_asn1 = X509_NAME_ENTRY_get_data(cn_entry);
+    if (cn_asn1 == NULL) {
+        fprintf(stderr, "Unable to convert CN entry into ASN1 string");
+        exit(EXIT_FAILURE);
+    }
+
+    char *cn = (char *)ASN1_STRING_data(cn_asn1);
+    if (cn == NULL) {
+        fprintf(stderr, "Unable to convert ASN1 string to C string");
+        exit(EXIT_FAILURE);
+    }
+
+    return hostmatch(domain_name, cn);
+}
+
 
 bool matches_subject_alt_name(char *domain_name, X509 *cert) {
+    
+    STACK_OF(GENERAL_NAME) *sans = NULL;
+    sans = X509_get_ext_d2i(cert, NID_subject_alt_name, NULL, NULL);
+    if (sans == NULL) {
+        return false;
+    }
 
-    return true;
+    int n_sans = sk_GENERAL_NAME_num(sans);
+    bool match = false;
+    for (int i = 0; i < n_sans; i++) {
+        GENERAL_NAME *san = sk_GENERAL_NAME_value(sans, i);
+
+        if (san->type == GEN_DNS) {
+            // Current SAN is a DNS, need to check it.
+            char *dns_name = (char *)ASN1_STRING_data(san->d.dNSName);
+            
+            if (hostmatch(domain_name, dns_name)) {
+                match = true;
+                break;
+            }
+        }
+    }
+
+    // Free the stack of SANs.
+    sk_GENERAL_NAME_pop_free(sans, GENERAL_NAME_free);
+
+    return match;
+}
+
+
+bool validate_domain_name(char *domain_name, X509 *cert) {
+    assert(domain_name != NULL && cert != NULL);
+
+    // First try to see if domain names matches CN.
+    bool match = matches_common_name(domain_name, cert);
+
+    // If it doesn't match CN, check for a match in SANs.
+    // Note that the function to update 'match' returns false
+    // if SAN extension does not exist within the certificate.
+    if (!match) {
+        match = matches_subject_alt_name(domain_name, cert);
+    }
+    return match;
 }
 
 
 
-void validate_basic_constraints(X509 *cert) {
+bool validate_basic_constraints(X509 *cert) {
     // Get the index of the Basic Constraints extension in the stack of extensions.
     int index = X509_get_ext_by_NID(cert, NID_basic_constraints, -1);
     X509_EXTENSION *ex = X509_get_ext(cert, index);
@@ -331,18 +345,22 @@ void validate_basic_constraints(X509 *cert) {
     data[bptr->length] = '\0';
 
 
-    printf("Basic Constraints: %s\n", data);
+    //printf("Basic Constraints: %s\n", data);
 
     if (strstr(data, BC_DEFAULT) == NULL) {
+        free(data);
+        return false;
         printf("Basic Constraints FAILED\n\n");
     } else {
+        free(data);
+        return true;
         printf("Basic Constraints PASSED\n\n");
     }
 }
 
 
 
-void validate_ext_key_usage(X509 *cert) {
+bool validate_ext_key_usage(X509 *cert) {
 
     int index = X509_get_ext_by_NID(cert, NID_ext_key_usage, -1);
     X509_EXTENSION *ex = X509_get_ext(cert, index);
@@ -373,17 +391,50 @@ void validate_ext_key_usage(X509 *cert) {
     data[bptr->length] = '\0';
 
 
-    printf("Extended key usage: %s\n", data);
+    // printf("Extended key usage: %s\n", data);
 
     if (strstr(data, EKU_DEFAULT) == NULL) {
+        return false;
         printf("Extended key usage FAILED\n\n");
     } else {
+        return true;
         printf("Extended key usage PASSED\n\n");
     }
 }
 
 
+int validate_certificate(char *filename, char *domain_name) {
 
+    BIO *certificate_bio = NULL;
+    X509 *cert = NULL;
+
+    //create BIO object to read certificate
+    certificate_bio = BIO_new(BIO_s_file());
+
+    //Read certificate into BIO
+    if (!(BIO_read_filename(certificate_bio, filename)))
+    {
+        fprintf(stderr, "Error in reading cert BIO filename\n");
+        exit(EXIT_FAILURE);
+    }
+    if (!(cert = PEM_read_bio_X509(certificate_bio, NULL, 0, NULL)))
+    {
+        fprintf(stderr, "Error in loading certificate\n");
+        exit(EXIT_FAILURE);
+    }
+
+    bool valid = validate_dates(cert) &&
+                 validate_domain_name(domain_name, cert) &&
+                 validate_rsa_key_size(cert) &&
+                 validate_basic_constraints(cert) &&
+                 validate_ext_key_usage(cert);
+
+
+    X509_free(cert);
+    BIO_free_all(certificate_bio);
+
+    return valid ? 1 : 0;
+}
 
 
 /** MAIN PROGRAM **/
@@ -403,9 +454,14 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    //initialise openSSL
+    OpenSSL_add_all_algorithms();
+    ERR_load_BIO_strings();
+    ERR_load_crypto_strings();
+
+
     char filename[MAX_LENGTH], domain[MAX_LENGTH];
     char line[MAX_LENGTH];
-
 
     // Parse all lines of csv file.
     while (fgets(line, MAX_LENGTH, fp) != NULL) {
@@ -414,22 +470,16 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Error reading in csv file\n");
             exit(EXIT_FAILURE);
         }
-        /*
-        printf("Filename: %s\n", filename);
-        printf("Domain  : %s\n", domain);
-        */
+
+        //printf("Filename: %s\n", filename);
+        //printf("Domain  : %s\n\n", domain);
+
+        int result = validate_certificate(filename, domain);
+
+        printf("%s,%s,%d\n", strstr(filename, "test"), domain, result);
     }
 
-
     fclose(fp);
-
-
-    printf("Filename: %s\n", filename);
-    printf("Domain: %s\n", domain);
-
-
-    int cmp = strcasecmp("Hello.world!", "hello.WORLD!");
-    printf("cmp = %d\n", cmp);
 
 
     // Get output file ready for the dicking.
@@ -438,44 +488,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error creating output file");
         exit(EXIT_FAILURE);
     }
-
-
-
-    const char test_cert_example[] = "./sample_certs/testthree.crt";
-    
-    BIO *certificate_bio = NULL;
-    X509 *cert = NULL;
-    X509_NAME *cert_issuer = NULL;
-    X509_CINF *cert_inf = NULL;
-    STACK_OF(X509_EXTENSION) * ext_list;
-
-    //initialise openSSL
-    OpenSSL_add_all_algorithms();
-    ERR_load_BIO_strings();
-    ERR_load_crypto_strings();
-
-    //create BIO object to read certificate
-    certificate_bio = BIO_new(BIO_s_file());
-
-    //Read certificate into BIO
-    if (!(BIO_read_filename(certificate_bio, test_cert_example)))
-    {
-        fprintf(stderr, "Error in reading cert BIO filename");
-        exit(EXIT_FAILURE);
-    }
-    if (!(cert = PEM_read_bio_X509(certificate_bio, NULL, 0, NULL)))
-    {
-        fprintf(stderr, "Error in loading certificate");
-        exit(EXIT_FAILURE);
-    }
-
-    print_certificate(cert);
-
-
-    validate_rsa_key_size(cert);
-    validate_dates(cert);
-    validate_basic_constraints(cert);
-    validate_ext_key_usage(cert);
 
 
     // Close the output file.
