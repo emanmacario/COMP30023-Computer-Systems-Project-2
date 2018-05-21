@@ -113,8 +113,10 @@ bool validate_rsa_key_size(X509 *cert) {
     printf("Key size = %d bits\n", keysize);
 
     if (keysize == RSA_KEYSIZE_DEFAULT) {
+        printf("RSA Key size PASSED\n\n");
         return true;
     }
+    printf("RSA Key size FAILED\n\n");
     return false;
 }
 
@@ -129,8 +131,10 @@ bool validate_not_before(X509 *cert) {
     // one or both of psec and pday will be positive.
 
     if (psec > 0 || pday > 0) {
+        printf("Not Before PASSED\n");
         return true;
     }
+    printf("Not Before FAILED\n");
     return false;
 }
 
@@ -145,14 +149,20 @@ bool validate_not_after(X509 *cert) {
     // one or both of psec and pday will be positive.
 
     if (psec > 0 || pday > 0) {
+        printf("Not After PASSED\n");
         return true;
     }
+    printf("Not After FAILED\n");
     return false;
 }
 
 
 bool validate_dates(X509 *cert) {
-    return validate_not_before(cert) && validate_not_after(cert);
+    bool nb, na;
+    nb = validate_not_before(cert);
+    na = validate_not_after(cert);
+
+    return nb && na;
 }
 
 
@@ -387,7 +397,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    const char test_cert_example[] = "./sample_certs/testeight.crt";
+    const char test_cert_example[] = "./sample_certs/testthree.crt";
     
     BIO *certificate_bio = NULL;
     X509 *cert = NULL;
@@ -418,127 +428,11 @@ int main(int argc, char *argv[]) {
     print_certificate(cert);
 
 
+    validate_rsa_key_size(cert);
+    validate_dates(cert);
     validate_basic_constraints(cert);
     validate_ext_key_usage(cert);
 
-
-
-
-    // Fucking around with extensions
-    STACK_OF(X509_EXTENSION) *exts = cert->cert_info->extensions;
-
-    int n_exts;
-    if (exts) {
-        n_exts = sk_X509_EXTENSION_num(exts);
-    } else {
-        n_exts = 0;
-    }
-
-
-    
-    for (int i = 0; i < n_exts; i++) {
-
-        X509_EXTENSION *ex = sk_X509_EXTENSION_value(exts, i);
-        if (ex == NULL) {
-            fprintf(stderr, "Unable to extract extension from stack");
-            exit(EXIT_FAILURE);
-        }
-
-        ASN1_OBJECT *obj = X509_EXTENSION_get_object(ex);
-        if (obj == NULL) {
-            fprintf(stderr, "Unable to extract ASN1 object from extension");
-        }
-
-
-
-        // Only check the NIDs of required extensions needed to be checked.
-        unsigned nid = OBJ_obj2nid(obj);
-
-        
-        if (nid != NID_basic_constraints && nid != NID_ext_key_usage
-                && nid != NID_subject_alt_name) {
-            continue;
-        }
-        
-        BIO *ext_bio = BIO_new(BIO_s_mem());
-        if (ext_bio == NULL) {
-            fprintf(stderr, "Unable to allocate memory for extension value BIO");
-        }
-
-
-        if (!X509V3_EXT_print(ext_bio, ex, 0, 0)) {
-            M_ASN1_OCTET_STRING_print(ext_bio, ex->value);
-        }
-
-        BUF_MEM *bptr;
-        BIO_flush(ext_bio);
-        BIO_get_mem_ptr(ext_bio, &bptr);
-        BIO_set_close(ext_bio, BIO_NOCLOSE);
-        BIO_free_all(ext_bio);
-
-
-        char *buf = (char *)malloc((bptr->length + 1) * sizeof(char));
-        memcpy(buf, bptr->data, bptr->length);
-        buf[bptr->length] = '\0';
-
-        nid = OBJ_obj2nid(obj);
-        if (nid == NID_undef) {
-            // no lookup found for the provided OID so nid came back as undefined.
-            char extname[EXTNAME_LEN];
-            OBJ_obj2txt(extname, EXTNAME_LEN, (const ASN1_OBJECT *) obj, 1);
-            printf("extension name is %s\n", extname);
-        } else {
-            // the OID translated to a NID which implies that the OID has a known sn/ln
-            const char *c_ext_name = OBJ_nid2ln(nid);
-            if (c_ext_name == NULL) {
-                fprintf(stderr, "Invalid X509v3 extension name");
-                exit(EXIT_FAILURE);
-            }
-            printf("extension name is %s\n", c_ext_name);
-        }
-
-        printf("extension length is %lu\n", bptr->length);
-        printf("extension value is %s\n", buf);
-        fflush(stdout);
-
-        // Check to see if certificate passed or failed.
-        if (nid == NID_basic_constraints) {
-            if (strstr(buf, BC_DEFAULT) == NULL) {
-                printf("Basic constrants FAILED\n\n");
-            } else {
-                printf("Basic constraints PASSED\n\n");
-            }
-        } else if (nid == NID_ext_key_usage) {
-            if (strstr(buf, EKU_DEFAULT) == NULL) {
-                printf("Extended key usage FAILED\n\n");
-            } else {
-                printf("Extended key usage PASSED\n\n");
-            }
-        }
-
-
-        if (nid == NID_subject_alt_name) {
-            STACK_OF(GENERAL_NAME) *sans = NULL;
-            sans = X509_get_ext_d2i(cert, NID_subject_alt_name, NULL, NULL);
-            if (sans == NULL) {
-                printf("No Subject Alternative Name extensions present\n");
-            }
-
-            int n_sans = sk_GENERAL_NAME_num(sans);
-            for (int i = 0; i < n_sans; i++) {
-                GENERAL_NAME *san = sk_GENERAL_NAME_value(sans, i);
-
-                if (san->type == GEN_DNS) {
-                    // Current SAN is a DNS, need to check it.
-                    char *dns_name = (char *)ASN1_STRING_data(san->d.dNSName);
-                    printf("DNS Name: %s\n", dns_name);
-                }
-            }
-            sk_GENERAL_NAME_pop_free(sans, GENERAL_NAME_free);
-        }   
-    }
-
-    sk_X509_EXTENSION_pop_free(exts, X509_EXTENSION_free);
 
     // Close the output file.
     fclose(fout);
