@@ -454,11 +454,18 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    //initialise openSSL
+    // Initialise openSSL
     OpenSSL_add_all_algorithms();
     ERR_load_BIO_strings();
     ERR_load_crypto_strings();
 
+
+    // Get output file ready for the dicking.
+    FILE *fout = fopen("output.csv", "w");
+    if (fout == NULL) {
+        fprintf(stderr, "Error creating output file");
+        exit(EXIT_FAILURE);
+    }
 
     char filename[MAX_LENGTH], domain[MAX_LENGTH];
     char line[MAX_LENGTH];
@@ -476,19 +483,11 @@ int main(int argc, char *argv[]) {
 
         int result = validate_certificate(filename, domain);
 
-        printf("%s,%s,%d\n", strstr(filename, "test"), domain, result);
+        fprintf(fout, "%s,%s,%d\n", filename, domain, result);
     }
 
+    // Close the input file.
     fclose(fp);
-
-
-    // Get output file ready for the dicking.
-    FILE *fout = fopen("output.csv", "w");
-    if (fout == NULL) {
-        fprintf(stderr, "Error creating output file");
-        exit(EXIT_FAILURE);
-    }
-
 
     // Close the output file.
     fclose(fout);
