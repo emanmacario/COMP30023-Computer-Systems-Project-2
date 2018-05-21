@@ -2,7 +2,7 @@
 # Made by Emmanuel Macario <macarioe@student.unimelb.edu.au>
 
 CC     = gcc
-CFLAGS = -lssl -lcrypto
+CFLAGS = -lssl -lcrypto -g -Wall
 OBJ    = certcheck.o
 EXE    = certcheck
 
@@ -11,6 +11,6 @@ $(EXE): $(OBJ)
 	$(CC) -o $(EXE) $(OBJ) $(CFLAGS)
 
 
-# Remove executables and object files
+# Remove executable and object files
 clean:
 	rm -f $(OBJ) $(EXE)
