@@ -1,12 +1,12 @@
 ./sample_certs/one.crt,www.example.com
 ./sample_certs/two.crt,www.mydomain.com
-./sample_certs/three.crt,www../sample_certs/.com
+./sample_certs/three.crt,www.test.com
 ./sample_certs/four.crt,www.oldsite.com
 ./sample_certs/five.crt,www.unimelb.com
-./sample_certs/six.crt,www.code./sample_certs/.com
+./sample_certs/six.crt,www.codetest.com
 ./sample_certs/seven.crt,www.example.com
 ./sample_certs/eight.crt,www.comp30023.com
-./sample_certs/nine.crt,www.cert./sample_certs/.com
+./sample_certs/nine.crt,www.certtest.com
 ./sample_certs/ten.crt,www.victoria.com
 ./sample_certs/eleven.crt,freeca.com
 ./sample_certs/two.crt,www.example.com
