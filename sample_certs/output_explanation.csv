@@ -1,0 +1,13 @@
+testone.crt,www.example.com,0,Invalid because key size is too small (1024 bits instead of >=2048)
+testtwo.crt,www.mydomain.com,1,Valid correct key size; valid dates; not a CA; server authentication; domain matches Common Name
+testthree.crt,www.test.com,0,Invalid valid from date - date is in the future
+testfour.crt,www.oldsite.com,0,Invalid - certificate has expired - valid to date in the past
+testfive.crt,www.unimelb.com,0,Invalid - extended key usage is only for client authentication
+testsix.crt,www.codetest.com,0,Invalid - extended key usage is code signing only
+testseven.crt,www.example.com,1,Valid - all correct - domain matches through Common Name wildcard No SAN
+testeight.crt,www.comp30023.com,1,Valid - all correct - domain matches Common Name and SAN
+testnine.crt,www.certtest.com,1,Valid - all correct - domain matches Common Name or SAN wildcard
+testten.crt,www.victoria.com,1,Valid - all correct - tests multiple extended key usage
+testeleven.crt,freeca.com,0,Invalid - marked as a CA
+testtwo.crt,www.example.com,0,Invalid - domain does not match Common Name
+testseven.crt,example.com,0,Invalid - wildcard Common Name requires subdomain 
