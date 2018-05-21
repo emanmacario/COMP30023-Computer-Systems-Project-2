@@ -6,6 +6,7 @@
  * Name: Emmanuel Macario <macarioe@student.unimelb.edu.au>
  * Student Number: 831659
  * Last Modified: 21/05/18
+ *
  */
 #include <stdio.h>
 #include <string.h>
@@ -16,13 +17,13 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
-
-#define MAX_LENGTH 1000
-#define BC_DEFAULT "CA:FALSE"
-#define EKU_DEFAULT "TLS Web Server Authentication"
-#define RSA_KEYSIZE_DEFAULT 2048
+#include "certcheck.h"
 
 
+/** 
+ * Gives the user information on how to use the program 
+ * and the required input command line arguments.
+ */
 void usage_exit(char *prog_name) {
     printf("Usage: %s [path to csv file]\n", prog_name);
     exit(EXIT_FAILURE);
