@@ -122,15 +122,15 @@ bool validate_rsa_key_size(X509 *cert) {
 
 
 bool validate_not_before(X509 *cert) {
-    int pday, psec;
+    int day, sec;
 
     ASN1_TIME *not_before = X509_get_notBefore(cert);
-    ASN1_TIME_diff(&pday, &psec, not_before, NULL);
+    ASN1_TIME_diff(&day, &sec, not_before, NULL);
 
     // Note: if current time is after Not Before, then
-    // one or both of psec and pday will be positive.
+    // one or both of sec and day will be positive.
 
-    if (psec > 0 || pday > 0) {
+    if (sec > 0 || day > 0) {
         printf("Not Before PASSED\n");
         return true;
     }
@@ -140,15 +140,15 @@ bool validate_not_before(X509 *cert) {
 
 
 bool validate_not_after(X509 *cert) {
-    int pday, psec;
+    int day, sec;
 
     ASN1_TIME *not_after = X509_get_notAfter(cert);
-    ASN1_TIME_diff(&pday, &psec, NULL, not_after);
+    ASN1_TIME_diff(&day, &sec, NULL, not_after);
 
     // Note: if current time is before Not After, then
-    // one or both of psec and pday will be positive.
+    // one or both of sec and day will be positive.
 
-    if (psec > 0 || pday > 0) {
+    if (sec > 0 || day > 0) {
         printf("Not After PASSED\n");
         return true;
     }
@@ -250,6 +250,49 @@ bool matches_common_name(const char *domain_name, X509 *cert) {
 }
 
 
+bool hostmatch(const char *domain_name, const char *pattern) {
+    char *pattern_wildcard;
+
+    // If no wildcard, just if they are the same.
+    pattern_wildcard = strchr(pattern, '*');
+    if (pattern_wildcard == NULL) {
+        return !strcasecmp(domain_name, pattern) ? true : false;
+    }
+
+    char *pattern_label_end, *domain_name_label_end;
+
+    // Require at least 2 dots in pattern to avoid too wide wildcard domains.
+    // i.e. A cert with '*' plus a TLD is not allowed (e.g. '*.com')
+    //      A cert with just '*' is too general and is not allowed.
+    pattern_label_end = strchr(pattern, '.');
+
+    if (pattern_label_end == NULL || strchr(pattern_label_end+1, '.') == NULL) {
+        return false;
+    }
+
+    // Make sure that the wildcard matches at least one character. Do this by
+    // checking left-most label of the hostname is at least as large as the 
+    // left-most label of the pattern. 
+    domain_name_label_end = strchr(domain_name, '.');
+    if (domain_name_label_end - domain_name < pattern_label_end - pattern) {
+        return false;
+    }
+
+    // Now, check if the domain name matches the pattern. Ensures that
+    // only a single level of subdomain matching is supported. This is because
+    // the wildcard only covers one level of subdomains.
+    if (domain_name_label_end == NULL ||
+        strcasecmp(domain_name_label_end, pattern_label_end)) {
+        return false;
+    }
+
+    // We have a match!
+    return true;
+}
+
+
+
+
 bool matches_subject_alt_name(char *domain_name, X509 *cert) {
 
     return true;
@@ -258,8 +301,9 @@ bool matches_subject_alt_name(char *domain_name, X509 *cert) {
 
 
 void validate_basic_constraints(X509 *cert) {
-    int basic_constraints_loc = X509_get_ext_by_NID(cert, NID_basic_constraints, -1);
-    X509_EXTENSION *ex = X509_get_ext(cert, basic_constraints_loc);
+    // Get the index of the Basic Constraints extension in the stack of extensions.
+    int index = X509_get_ext_by_NID(cert, NID_basic_constraints, -1);
+    X509_EXTENSION *ex = X509_get_ext(cert, index);
 
     ASN1_OBJECT *obj = X509_EXTENSION_get_object(ex);
     if (obj == NULL) {
@@ -300,8 +344,8 @@ void validate_basic_constraints(X509 *cert) {
 
 void validate_ext_key_usage(X509 *cert) {
 
-    int ext_key_usage_loc = X509_get_ext_by_NID(cert, NID_ext_key_usage, -1);
-    X509_EXTENSION *ex = X509_get_ext(cert, ext_key_usage_loc);
+    int index = X509_get_ext_by_NID(cert, NID_ext_key_usage, -1);
+    X509_EXTENSION *ex = X509_get_ext(cert, index);
 
     ASN1_OBJECT *obj = X509_EXTENSION_get_object(ex);
     if (obj == NULL) {
