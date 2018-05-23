@@ -18,6 +18,7 @@
 #define BASIC_CONSTRAINTS_DEFAULT "CA:FALSE"
 #define EXTENDED_KEY_USAGE_DEFAULT "TLS Web Server Authentication"
 #define RSA_MINIMUM_KEYSIZE 2048
+#define OUTPUT_FILE "output.csv"
 
 
 // FUNCTION PROTOYPES

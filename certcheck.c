@@ -444,7 +444,7 @@ int main(int argc, char *argv[]) {
     ERR_load_crypto_strings();
 
     // Get output file ready for writing into.
-    FILE *out = fopen("output.csv", "w");
+    FILE *out = fopen(OUTPUT_FILE, "w");
     if (out == NULL) {
         fprintf(stderr, "Error creating output file\n");
         exit(EXIT_FAILURE);
