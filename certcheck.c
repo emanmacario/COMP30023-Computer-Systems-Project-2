@@ -125,9 +125,9 @@ bool matches(char *domain_name, char *pattern) {
         return !strcasecmp(domain_name, pattern) ? true : false;
     }
 
-    // Now, we know there exists a wildcard in the pattern. Ensure at minimum 
-    // two periods are present in pattern to avoid wildcard domains that are
-    // 'too wide'.
+    // Otherwise, there exists a wildcard in the pattern. Ensure at minimum 
+    // two periods are present in the pattern to avoid wildcard domains that 
+    // are 'too wide'.
     // i.e. A cert with '*' plus a TLD is not allowed (e.g. '*.com').
     //      A cert with just '*' is too general and is not allowed.
     pattern_label_end = strchr(pattern, '.');
@@ -296,7 +296,7 @@ bool validate_basic_constraints(X509 *cert) {
     BIO_flush(ext_bio);
     BIO_get_mem_ptr(ext_bio, &bptr);
 
-    // Null terminate the value so that we can perform string comparison.
+    // Copy and null terminate the value so we can perform string comparison.
     char *data = (char *)malloc((bptr->length + 1) * sizeof(char));
     assert(data != NULL);
     memcpy(data, bptr->data, bptr->length);
@@ -348,7 +348,7 @@ bool validate_ext_key_usage(X509 *cert) {
     BIO_flush(ext_bio);
     BIO_get_mem_ptr(ext_bio, &bptr);
 
-    // Null terminate the value so that we can perform string comparison.
+    // Copy and null terminate the value so we can perform string comparison.
     char *data = (char *)malloc((bptr->length + 1) * sizeof(char));
     assert(data != NULL);
     memcpy(data, bptr->data, bptr->length);
