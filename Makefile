@@ -1,8 +1,7 @@
 # Makefile for COMP30023 Computer Systems - Assignment 2
 # Made by Emmanuel Macario <macarioe@student.unimelb.edu.au>
-
 CC     = gcc
-CFLAGS = -lssl -lcrypto
+CFLAGS = -lssl -lcrypto -g -Wall
 OBJ    = certcheck.o
 EXE    = certcheck
 
@@ -10,7 +9,9 @@ EXE    = certcheck
 $(EXE): $(OBJ)
 	$(CC) -o $(EXE) $(OBJ) $(CFLAGS)
 
+# Object file dependencies
+certcheck.o: certcheck.h
 
-# Remove executables and object files
+# Remove executable and object files
 clean:
 	rm -f $(OBJ) $(EXE)
