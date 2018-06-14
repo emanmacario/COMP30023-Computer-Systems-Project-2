@@ -1,0 +1,68 @@
+Starting automated marking of macarioe
+Looking for project folder
+Found project directory ./comp30023-2018-project-2
+Commit Time: 2018-05-24T00:34:12+10:00, with Hash: a3938d819d022d2ed8e56364f11b9465283e1d3a
+Submission is before deadline
+
+Running make clean
+rm -f certcheck.o certcheck
+make clean found and run
+
+Running make
+gcc -lssl -lcrypto -g -Wall   -c -o certcheck.o certcheck.c
+gcc -o certcheck certcheck.o -lssl -lcrypto -g -Wall
+Executable created after make call
+
+Looking for executable
+Found certcheck exe
+About to run certcheck (./certcheck)
+++++++++++++++++++++++++
++start certcheck output+
+++++++++++++++++++++++++
+++++++++++++++++++++++++
++ end certcheck output +
+++++++++++++++++++++++++
+Finished running certcheck (./testinput.csv), exited normally
+output.csv found
+Test testone.crt,www.example.com:PASS
+Test testtwo.crt,www.mydomain.com:PASS
+Test testthree.crt,www.test.com:PASS
+Test testfour.crt,www.oldsite.com:PASS
+Test testfive.crt,www.unimelb.com:PASS
+Test testsix.crt,www.codetest.com:PASS
+Test testseven.crt,www.example.com:PASS
+Test testeight.crt,www.comp30023.com:PASS
+Test testnine.crt,www.certtest.com:PASS
+Test testten.crt,www.victoria.com:PASS
+Test testeleven.crt,freeca.com:PASS
+Test testtwo.crt,www.example.com:PASS
+Test testseven.crt,example.com:PASS
+Test testnine.crt,new.www.certtest.com:PASS
+Test testnine.crt,new.certtest.com:PASS
+Test testnine.crt,mail.CERTTEST.com:PASS
+Test testnine.crt,webmail.comp30023.com:PASS
+Test testnine.crt,webmail.comp30023.community:PASS
+
+
+Start Feedback Comments
+=======================
+
+Thank you.
+
+Additional Comments and Marks
+*****************************
+
+Part A - Git Usage: 1 out of 1
+Part A - Makefile: 1 out of 1
+Part A - Code Clarity: 2 out of 2
+Part A - Correct Interface: 1 out of 1
+Part B - Read/Write CSV: 1 out of 1
+Part B - NotBefore Check: 1 out of 1
+Part B - NotAfter Check: 1 out of 1
+Part B - CommonName Check: 2 out of 2
+Part C - KeyLength Check: 1 out of 1
+Part C - KeyUsage Check: 2 out of 2
+Part C - SAN Check: 2 out of 2
+
+=======================
+End Feedback Comments
